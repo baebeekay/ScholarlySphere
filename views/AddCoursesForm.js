@@ -97,11 +97,7 @@ const AddCoursesForm = () => {
             selectedValue={form.courseTitle}
             onValueChange={(itemValue) => {
               setForm({ ...form, courseTitle: itemValue });
-              // // Automatically set code if a matching title is selected
-              // const selectedCourse = Courses.find(c => c.title === itemValue);
-              // if (selectedCourse) {
-              //   setForm(prevForm => ({ ...prevForm, courseCode: selectedCourse.code }));
-              // }
+             
             }}
             style={addCoursesFormStyles.picker}
             itemStyle={addCoursesFormStyles.pickerItem}

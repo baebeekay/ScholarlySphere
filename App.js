@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Button} from '@react-navigation/elements';
-import Ionicons from '@expo/vector-icons/Ionicons';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 //navigation
 import {
   createStaticNavigation,
@@ -17,7 +17,7 @@ import AddCourseScreen from './screens/AddCourseScreen';
 import CourseListScreen from './screens/CourseListScreen';
 import TimeTableScreen from './screens/TimeTableScreen';
 import StudentListScreen from './screens/StudentListScreen';
-import SettingsScreen from './screens/SettingsScreen';
+import NotificationsScreen from './screens/NotificationScreen';
 import StudentRecordScreen from './screens/StudentRecordScreen';
 
 const HomeTabs = createBottomTabNavigator({
@@ -30,8 +30,8 @@ const HomeTabs = createBottomTabNavigator({
         iconName = focused
           ? 'home'
           : 'home';
-      } else if (route.name === 'Settings') {
-        iconName = focused ? 'settings' : 'settings';
+      } else if (route.name === 'Notifications') {
+        iconName = focused ? 'notifications-outline' : 'notifications-outline';
       }
 
       
@@ -42,7 +42,7 @@ const HomeTabs = createBottomTabNavigator({
   }),
   screens: {
     Home: HomeScreen,
-    Settings: SettingsScreen,
+    Notifications: NotificationsScreen,
   },
  
 });
@@ -53,7 +53,7 @@ const HomeTabs = createBottomTabNavigator({
 
 
 const RootStack = createNativeStackNavigator({
-  initialRouteName: 'Home',
+  initialRouteName: 'Login',
   screens: {
     AddCourses: AddCourseScreen,
     StudentList: StudentListScreen,

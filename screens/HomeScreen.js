@@ -4,13 +4,13 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 
 function HomeScreen() {
   const navigation = useNavigation();
-  // const route = useRoute();
-  // const { username } = route.params || { username: 'User' };
+   const route = useRoute();
+  const { username } = route.params || { };
   
   return (
     <SafeAreaProvider>
       <SafeAreaView style={homeStyles.safeArea}>
-        <Text style={homeStyles.welcomeText}>Welcome!</Text>
+        <Text style={homeStyles.welcomeText}>Welcome { username }!</Text>
         <View style={homeStyles.row}>
           <TouchableOpacity
             style={homeStyles.cardButton}

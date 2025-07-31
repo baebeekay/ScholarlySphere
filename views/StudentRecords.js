@@ -15,7 +15,8 @@ import { useSQLiteContext } from 'expo-sqlite';
 const StudentRecord = () => {
   const navigation = useNavigation();
   const route = useRoute();
-  const { id, name, regNo, courseCode } = route.params;
+  // Removed username from route.params
+  const { id, name, regNo, courseCode } = route.params || {}; 
 
   const [courseWork, setCourseWork] = useState('');
   const [testScore, setTestScore] = useState('');
@@ -26,28 +27,55 @@ const StudentRecord = () => {
 
   const db = useSQLiteContext();
 
-  const calculateTotalScore = (ca, test, exam) => {
-    const parsedCa = parseFloat(ca || 0);
+  const calculateTotalScore = (courseWork, test, exam) => {
+    const parsedCa = parseFloat(courseWork || 0);
     const parsedTest = parseFloat(test || 0);
     const parsedExam = parseFloat(exam || 0);
-    return parsedCa + parsedTest + parsedExam;
+    // Ensure scores don't exceed their maximums before summing
+    const validCa = Math.min(parsedCa, 15);
+    const validTest = Math.min(parsedTest, 15);
+    const validExam = Math.min(parsedExam, 70);
+    return validCa + validTest + validExam;
+  };
+
+  const calculateGrade = (total) => {
+    if (total >= 70) return 'A';
+    if (total >= 60) return 'B';
+    if (total >= 50) return 'C';
+    if (total >= 45) return 'D';
+    if (total >= 40) return 'E';
+    return 'F';
   };
 
   useEffect(() => {
     const loadStudentScores = async () => {
+      // Removed username from this check
+      if (!id || !courseCode) {
+        console.warn("Missing parameters for loading student scores. Skipping load.");
+        setIsLoading(false);
+        return;
+      }
       setIsLoading(true);
       try {
+        // Removed username from WHERE clause
         const result = await db.getFirstAsync(
           'SELECT * FROM enrollment WHERE id = ? AND courseCode = ?',
-          [id, courseCode]
+          [id, courseCode] 
         );
         if (result) {
-          setCourseWork(result.courseWork || '');
-          setTestScore(result.testScore || '');
-          setExamScore(result.examScore || '');
-          setTotal(result.total || 0);
-          setGrade(result.grade || '');
+          setCourseWork(
+            result.courseWork !== null ? result.courseWork.toString() : ''
+          );
+          setTestScore(
+            result.testScore !== null ? result.testScore.toString() : ''
+          );
+          setExamScore(
+            result.examScore !== null ? result.examScore.toString() : ''
+          );
+          setTotal(result.total !== null ? result.total : 0);
+          setGrade(result.grade !== null ? result.grade : '');
         } else {
+          // No existing record, reset fields
           setCourseWork('');
           setTestScore('');
           setExamScore('');
@@ -58,7 +86,7 @@ const StudentRecord = () => {
         console.error('Database error loading student scores:', error);
         Alert.alert(
           'Error',
-          error.message || 'An error occurred while loading student score.'
+          error.message || 'An error occurred while loading student scores.'
         );
       } finally {
         setIsLoading(false);
@@ -66,69 +94,87 @@ const StudentRecord = () => {
     };
 
     loadStudentScores();
-  }, [id, courseCode]); // Re-run when studentId or courseCode changes
+  }, [id, courseCode, db]); // Removed username from dependency array
 
-  // Recalculate total score whenever input fields change
   useEffect(() => {
-    setTotal(calculateTotalScore(courseWork, testScore, examScore));
+    const newTotal = calculateTotalScore(courseWork, testScore, examScore);
+    setTotal(newTotal);
+    setGrade(calculateGrade(newTotal));
   }, [courseWork, testScore, examScore]);
 
   const handleSaveScores = async () => {
-    // // Basic validation
-    // if (
-    //   courseWork === '' ||
-    //   testScore === '' ||
-    //   examScore === '' ||
-    //   grade === ''
-    // ) {
-    //   Alert.alert(
-    //     'Validation Error',
-    //     'All fields (CA, Test, Exam, Grade) are required.'
-    //   );
-    //   return;
-    // }
-    // if (
-    //   isNaN(parseFloat(caScore)) ||
-    //   isNaN(parseFloat(testScore)) ||
-    //   isNaN(parseFloat(examScore))
-    // ) {
-    //   Alert.alert(
-    //     'Validation Error',
-    //     'Please enter valid numbers for CA, Test, and Exam scores.'
-    //   );
-    //   return;
-    // }
+    const parsedCa = parseFloat(courseWork);
+    const parsedTest = parseFloat(testScore);
+    const parsedExam = parseFloat(examScore);
+
+    if (isNaN(parsedCa) || isNaN(parsedTest) || isNaN(parsedExam)) {
+      Alert.alert(
+        'Validation Error',
+        'Please enter valid numbers for CA, Test, and Exam scores.'
+      );
+      return;
+    }
+
+    if (parsedCa < 0 || parsedTest < 0 || parsedExam < 0) {
+      Alert.alert(
+        'Validation Error',
+        'Scores cannot be negative.'
+      );
+      return;
+    }
+
+    if (parsedCa > 15 || parsedTest > 15) {
+      Alert.alert(
+        'Validation Error',
+        'CA Score and Test Score cannot exceed 15.'
+      );
+      return;
+    }
+    if (parsedExam > 70) {
+      Alert.alert('Validation Error', 'Exam Score cannot exceed 70.');
+      return;
+    }
+
+    const finalTotal = calculateTotalScore(courseWork, testScore, examScore);
+    if (finalTotal > 100) {
+      Alert.alert('Validation Error', 'Total score cannot exceed 100.');
+      return;
+    }
 
     try {
+      // Check if a record already exists for this student and course (username removed)
       const existingRecord = await db.getFirstAsync(
         'SELECT * FROM enrollment WHERE id = ? AND courseCode = ?',
-        [id, courseCode]
+        [id, courseCode] 
       );
 
       if (existingRecord) {
+        // Update existing record (username removed from WHERE clause)
         await db.runAsync(
-          `UPDATE enrollment SET courseWork = ?, testScore = ?, examScore = ?, total = ?, grade = ? WHERE id = ?`,
+          `UPDATE enrollment SET courseWork = ?, testScore = ?, examScore = ?, total = ?, grade = ? WHERE id = ? AND courseCode = ?`,
           [
-            parseFloat(courseWork),
-            parseFloat(testScore),
-            parseFloat(examScore),
-            total,
-            grade,
-            existingRecord.id,
+            parsedCa,
+            parsedTest,
+            parsedExam,
+            finalTotal,
+            calculateGrade(finalTotal),
+            id,       
+            courseCode 
           ]
         );
         Alert.alert('Success', 'Scores updated successfully!');
       } else {
+        // Insert new record (username column removed from INSERT statement)
         await db.runAsync(
           `INSERT INTO enrollment (id, courseCode, courseWork, testScore, examScore, total, grade) VALUES (?, ?, ?, ?, ?, ?, ?)`,
           [
             id,
             courseCode,
-            parseFloat(courseWork),
-            parseFloat(testScore),
-            parseFloat(examScore),
-            total,
-            grade,
+            parsedCa,
+            parsedTest,
+            parsedExam,
+            finalTotal,
+            calculateGrade(finalTotal),
           ]
         );
         Alert.alert('Success', 'Scores saved successfully!');
@@ -171,46 +217,40 @@ const StudentRecord = () => {
           <Text style={studentRecordStyles.infoValue}>{courseCode}</Text>
         </View>
 
-        <Text style={studentRecordStyles.sectionTitle}>Enter Scores</Text>
-
-        <Text style={studentRecordStyles.inputLabel}>courseWork:</Text>
+        <Text style={studentRecordStyles.inputLabel}>
+          CA Score (out of 15):
+        </Text>
         <TextInput
           style={studentRecordStyles.input}
-          keyboardType="numeric"
           value={courseWork}
-          onChangeText={(text) => setCourseWork(text.replace(/[^0-9.]/g, ''))}
+          onChangeText={(text) => setCourseWork(text)}
+          keyboardType="numeric"
           placeholder="e.g., 12"
-          maxLength={2}
+          maxLength={2} 
         />
 
-        <Text style={studentRecordStyles.inputLabel}>Test Score:</Text>
+        <Text style={studentRecordStyles.inputLabel}>
+          Test Score (out of 15):
+        </Text>
         <TextInput
           style={studentRecordStyles.input}
-          keyboardType="numeric"
           value={testScore}
-          onChangeText={(text) => setTestScore(text.replace(/[^0-9.]/g, ''))}
-          placeholder="e.g., 12"
-          maxLength={2}
-        />
-
-        <Text style={studentRecordStyles.inputLabel}>Exam Score:</Text>
-        <TextInput
-          style={studentRecordStyles.input}
+          onChangeText={(text) => setTestScore(text)}
           keyboardType="numeric"
-          value={examScore}
-          onChangeText={(text) => setExamScore(text.replace(/[^0-9.]/g, ''))}
-          placeholder="e.g., 50"
-          maxLength={2}
+          placeholder="e.g., 10"
+          maxLength={2} 
         />
 
-        <Text style={studentRecordStyles.inputLabel}>Grade:</Text>
+        <Text style={studentRecordStyles.inputLabel}>
+          Exam Score (out of 70):
+        </Text>
         <TextInput
           style={studentRecordStyles.input}
-          value={grade}
-          onChangeText={setGrade}
-          placeholder="e.g., A"
-          maxLength={2}
-          autoCapitalize="characters"
+          value={examScore}
+          onChangeText={(text) => setExamScore(text)}
+          keyboardType="numeric"
+          placeholder="e.g., 55"
+          maxLength={2} 
         />
 
         <Text style={studentRecordStyles.sectionTitle}>Summary</Text>
@@ -222,7 +262,7 @@ const StudentRecord = () => {
             <Text style={studentRecordStyles.tableHeaderCell}>Grade</Text>
           </View>
           <View style={studentRecordStyles.tableRow}>
-            <Text style={studentRecordStyles.tableCell}>courseWork</Text>
+            <Text style={studentRecordStyles.tableCell}>CA Score</Text>
             <Text style={studentRecordStyles.tableCell}>
               {courseWork || 'N/A'}
             </Text>
@@ -247,7 +287,9 @@ const StudentRecord = () => {
               studentRecordStyles.tableRow,
               studentRecordStyles.totalRow,
             ]}>
-            <Text style={studentRecordStyles.tableCell}>Total Score</Text>
+            <Text style={studentRecordStyles.tableCell}>
+              Total Score (Max 100)
+            </Text>
             <Text style={studentRecordStyles.tableCell}>
               {total.toFixed(2)}
             </Text>
@@ -264,6 +306,7 @@ const StudentRecord = () => {
     </ScrollView>
   );
 };
+
 
 const studentRecordStyles = StyleSheet.create({
   scrollContainer: {

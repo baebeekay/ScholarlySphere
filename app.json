@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "proj",
+    "name": "Scholarlysphere",
     "slug": "scholarlysphere",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -17,10 +17,11 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/shpere-logo.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "package": "com.baebeekay.scholarlysphere"
     },
     "web": {
       "favicon": "./assets/favicon.png",
@@ -31,6 +32,9 @@
         "projectId": "50a9591e-eeae-499b-8c85-e42c3fd702ea"
       }
     },
-    "owner": "baebeekay"
+    "owner": "baebeekay",
+    "plugins": [
+      "expo-sqlite"
+    ]
   }
 }
