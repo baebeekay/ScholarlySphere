@@ -1,0 +1,34 @@
+{
+  "expo": {
+    "name": "ScholarlySphere",
+    "slug": "snack-b963f57b-6efe-48cc-acdf-4a2c72fa3399",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./Logo.png",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./Logo.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./Logo.png",
+        "backgroundColor": "#ffffff"
+      },
+      "edgeToEdgeEnabled": true
+    },
+    "web": {
+      "favicon": "./Logo.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "c58ac960-d787-46d1-bdf4-12cae005618c"
+      }
+    }
+  }
+}
