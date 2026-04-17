@@ -31,7 +31,7 @@ Icons/Styling: Native StyleSheet with emoji support.
 Clone the repository:
 
 Bash
-git clone https://github.com/yourusername/lecture-scheduler.git
+git clone https://github.com/baebeekay/ScholarlySphere.git
 cd lecture-scheduler
 Install dependencies:
 
@@ -59,7 +59,7 @@ Permissions: Upon first launch, the app will request permission to send alerts.
 
 Calculation Logic: Notifications are calculated based on the initialTriggerDate and reminderOffset. If you set a lecture for Monday at 10:00 AM with a 10-minute reminder, the notification trigger is set for 9:50 AM.
 
-📖 Usage
+## Usage
 Adding a Lecture
 Click the Add Lecture button.
 
@@ -94,7 +94,7 @@ Reset the application state.
 
 
 
-###Troubleshooting
+### Troubleshooting
 
 Notifications not appearing? Ensure "Do Not Disturb" is off and that you are testing on a physical device.
 
